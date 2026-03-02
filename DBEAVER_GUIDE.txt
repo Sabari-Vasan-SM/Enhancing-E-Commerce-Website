@@ -1,0 +1,249 @@
+================================================================================
+                     DBREAVER - DATABASE VIEWER GUIDE
+================================================================================
+
+STEP 1: INSTALL DBEAVER (if not already installed)
+================================================================================
+1. Download from: https://dbeaver.io/download/
+2. Choose DBeaver Community Edition (free)
+3. Download Windows installer and run it
+4. Follow installation wizard
+
+OR use Chocolatey (if installed):
+  choco install dbeaver-community
+
+================================================================================
+STEP 2: START POSTGRESQL (if not running)
+================================================================================
+Before connecting in DBeaver, ensure PostgreSQL is running:
+
+  & "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Program Files\PostgreSQL\18\data" -l "C:\Program Files\PostgreSQL\18\data\log.txt" start
+
+================================================================================
+STEP 3: CREATE CONNECTION IN DBEAVER
+================================================================================
+
+A. Open DBeaver
+   - Double-click DBeaver icon or search in Windows Start Menu
+
+B. Create New Database Connection
+   - Click "Database" menu → "New Database Connection"
+   - Or click on the "+" button in Database Navigator (left sidebar)
+   - Or use shortcut: Ctrl + Shift + N
+
+C. Select PostgreSQL Driver
+   - Select "PostgreSQL" from the list
+   - Click "Next"
+   - If prompted to download driver, click "Download"
+
+D. Connection Settings
+   Fill in the following details:
+
+   Server Host:        localhost
+   Port:               5432
+   Database:           ecommerce_personalized
+   Username:           postgres
+   Password:           sabari
+   
+   ✓ Check "Save password locally" (optional)
+
+E. Test Connection
+   - Click "Test Connection" button
+   - You should see: "Connected (PostgreSQL 18.x)"
+   - If it fails, check PostgreSQL is running and credentials are correct
+
+F. Finish
+   - Click "Finish"
+   - Connection will appear in left sidebar "Database Navigator"
+
+================================================================================
+STEP 4: EXPLORE DATABASE IN DBEAVER
+================================================================================
+
+Left Sidebar - Database Navigator:
+  Expand "postgres (ecommerce_personalized)" to see:
+  
+  ├── Databases
+  │   └── ecommerce_personalized
+  ├── Schemas
+  │   └── public
+  │       ├── Tables
+  │       │   ├── users              (User accounts with classifications)
+  │       │   ├── categories         (Product categories)
+  │       │   ├── brands             (Product brands)
+  │       │   ├── products           (Product catalog)
+  │       │   ├── cart_items         (Shopping cart items)
+  │       │   ├── orders             (Order history)
+  │       │   ├── order_items        (Items in orders)
+  │       │   └── user_classifications (User type: price, brand, interaction, etc)
+  │       ├── Views
+  │       └── Functions
+
+================================================================================
+STEP 5: VIEW TABLE DATA
+================================================================================
+
+Method 1: Double-click table
+  - Double-click any table in left sidebar
+  - Data grid appears in main editor
+  - See all records with column headers
+
+Method 2: Right-click menu
+  - Right-click table → "View Data"
+  - Show first 200 rows
+  - Show first 1000 rows
+  - Custom row limit
+
+Method 3: SQL Query
+  - Click "SQL" tab or "SQL Editor" → "New SQL Script"
+  - Run queries like:
+    
+    SELECT * FROM users;
+    SELECT * FROM products;
+    SELECT * FROM categories;
+    SELECT * FROM user_classifications;
+
+================================================================================
+STEP 6: KEY TABLES TO EXPLORE
+================================================================================
+
+1. USERS TABLE
+   Shows registered users with their classification
+
+   Query:
+     SELECT id, email, username, user_type, created_at 
+     FROM users;
+
+2. PRODUCTS TABLE
+   Shows all 20 sample products with prices and details
+
+   Query:
+     SELECT id, name, price, category_id, brand_id, stock 
+     FROM products;
+
+3. CATEGORIES TABLE
+   Shows 8 product categories
+
+   Query:
+     SELECT * FROM categories;
+
+4. BRANDS TABLE
+   Shows 10 brands
+
+   Query:
+     SELECT * FROM brands;
+
+5. USER_CLASSIFICATIONS TABLE
+   Shows how each user is classified (price-seeker, brand-loyal, etc)
+
+   Query:
+     SELECT u.email, uc.classification_type, uc.score 
+     FROM user_classifications uc
+     JOIN users u ON uc.user_id = u.id;
+
+6. CART_ITEMS TABLE
+   Shows items in shopping carts
+
+   Query:
+     SELECT u.email, p.name, ci.quantity, p.price 
+     FROM cart_items ci
+     JOIN products p ON ci.product_id = p.id
+     JOIN users u ON ci.user_id = u.id;
+
+7. ORDERS TABLE
+   Shows order history
+
+   Query:
+     SELECT o.id, u.email, o.total_amount, o.created_at 
+     FROM orders o
+     JOIN users u ON o.user_id = u.id;
+
+================================================================================
+STEP 7: USEFUL DBEAVER FEATURES
+================================================================================
+
+Viewing Data:
+  - Sort columns: Click column header
+  - Filter rows: Right-click column → "Filter"
+  - Export data: Right-click table → "Export Data"
+  - Copy as SQL: Copy rows as INSERT statements
+
+Writing Queries:
+  - SQL Editor: Database → SQL Editor → New Script (Ctrl + Alt + N)
+  - Syntax highlighting and auto-completion
+  - Execute: Ctrl + Enter or click Run button
+  - View execution results in Result tab
+
+Database Schema:
+  - Right-click table → "Properties" to see columns, indexes, constraints
+  - View relationships and foreign keys
+  - Check table definitions and DDL
+
+Monitoring:
+  - Server → "Connections" to see active connections
+  - Activity Monitor to check queries running
+
+================================================================================
+STEP 8: TROUBLESHOOTING
+================================================================================
+
+Connection Failed:
+  ✗ PostgreSQL not running
+    → Run: & "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Program Files\PostgreSQL\18\data" start
+
+  ✗ Wrong password
+    → Password is: sabari
+
+  ✗ Wrong port
+    → Port should be: 5432
+
+  ✗ Database doesn't exist
+    → Database name: ecommerce_personalized (must be lowercase)
+
+Can't see tables:
+  - Expand "Schemas" → "public" → "Tables"
+  - Or refresh (F5 key)
+
+Password not saving:
+  - Uncheck "Save password locally" and re-enter it
+  - Or check DBeaver preferences
+
+================================================================================
+STEP 9: SAMPLE QUERIES FOR EXPLORATION
+================================================================================
+
+View all demo data:
+  -- Total products in each category
+  SELECT c.name, COUNT(p.id) as product_count
+  FROM categories c
+  LEFT JOIN products p ON c.id = p.category_id
+  GROUP BY c.id, c.name;
+
+  -- Products with their brand
+  SELECT p.id, p.name, b.name as brand, p.price, p.stock
+  FROM products p
+  LEFT JOIN brands b ON p.brand_id = b.id
+  ORDER BY p.price DESC;
+
+  -- User classifications
+  SELECT u.email, u.user_type, u.created_at
+  FROM users u
+  ORDER BY u.created_at DESC;
+
+  -- Cart contents
+  SELECT u.email, COUNT(ci.id) as items_in_cart, SUM(ci.quantity) as total_qty
+  FROM users u
+  LEFT JOIN cart_items ci ON u.id = ci.user_id
+  GROUP BY u.id, u.email;
+
+================================================================================
+DATABASE CREDENTIALS (For Reference)
+================================================================================
+
+Host:     localhost
+Port:     5432
+Database: ecommerce_personalized
+Username: postgres
+Password: sabari
+
+================================================================================

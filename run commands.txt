@@ -1,0 +1,149 @@
+================================================================================
+                    E-COMMERCE PROJECT - RUN COMMANDS
+================================================================================
+
+STEP 1: START POSTGRESQL DATABASE
+================================================================================
+Command:
+  & "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Program Files\PostgreSQL\18\data" -l "C:\Program Files\PostgreSQL\18\data\log.txt" start
+
+Notes:
+  - PostgreSQL must be running before the backend server starts
+  - Default port: 5432
+  - User: postgres
+  - Password: sabari
+  - Database: ecommerce_personalized
+
+Alternative (if needed - clean start):
+  Remove-Item "C:\Program Files\PostgreSQL\18\data\postmaster.pid" -ErrorAction SilentlyContinue; & "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Program Files\PostgreSQL\18\data" -l "C:\Program Files\PostgreSQL\18\data\log.txt" start
+
+To stop PostgreSQL:
+  & "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Program Files\PostgreSQL\18\data" stop
+
+================================================================================
+STEP 2: START BACKEND SERVER (FastAPI)
+================================================================================
+Location: D:\Enhancing E-Commerce Website\backend
+
+Command:
+  cd "D:\Enhancing E-Commerce Website\backend"
+  .\venv\Scripts\Activate.ps1
+  uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+Notes:
+  - Backend runs on http://localhost:8000
+  - Health check: http://localhost:8000/health
+  - API docs: http://localhost:8000/docs
+  - Keep this terminal running
+  - Requires PostgreSQL to be running first
+  - Auto-reloads on code changes
+
+Test the backend:
+  Invoke-WebRequest -Uri http://localhost:8000/health -UseBasicParsing
+
+================================================================================
+STEP 3: RUN FLUTTER APP (Web - Chrome)
+================================================================================
+Location: D:\Enhancing E-Commerce Website\frontend\ecommerce_app
+
+Command:
+  cd "D:\Enhancing E-Commerce Website\frontend\ecommerce_app"
+  flutter run -d chrome
+
+Notes:
+  - Launches the app in Google Chrome browser
+  - Backend server must be running (step 2) before launching the app
+  - App will connect to http://localhost:8000 for API calls
+  - Hot reload: Press 'r' to reload the app
+  - Hot restart: Press 'R' to restart the app
+  - Exit: Press 'q' to exit
+
+Alternative devices:
+  - Windows (desktop):  flutter run -d windows
+  - Edge (web):         flutter run -d edge
+
+List available devices:
+  flutter devices
+
+================================================================================
+STEP 4: DEFAULT LOGIN CREDENTIALS
+================================================================================
+Email:    demo@example.com
+Password: demo123
+
+Database contains:
+  - 8 product categories
+  - 10 brands
+  - 20 sample products
+  - 1 demo user account
+
+================================================================================
+QUICK START (ALL COMMANDS IN SEQUENCE)
+================================================================================
+Open PowerShell and run these 3 commands in separate terminals/tabs:
+
+Terminal 1 - PostgreSQL:
+  & "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Program Files\PostgreSQL\18\data" -l "C:\Program Files\PostgreSQL\18\data\log.txt" start
+
+Terminal 2 - Backend:
+  cd "D:\Enhancing E-Commerce Website\backend"; .\venv\Scripts\Activate.ps1; uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+Terminal 3 - Flutter App:
+  cd "D:\Enhancing E-Commerce Website\frontend\ecommerce_app"; flutter run -d chrome
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+PostgreSQL won't start:
+  - Remove stale PID: Remove-Item "C:\Program Files\PostgreSQL\18\data\postmaster.pid" -ErrorAction SilentlyContinue
+  - Then try starting again
+
+Backend won't start:
+  - Ensure PostgreSQL is running first
+  - Check if port 8000 is already in use: & netstat -ano | findstr :8000
+  - Kill process if needed: taskkill /PID <PID> /F
+
+Flutter won't compile:
+  - Run: flutter clean
+  - Then: flutter pub get
+  - Then: flutter analyze
+
+Backend health check fails:
+  - Ensure uvicorn server is running in Terminal 2
+  - Wait a few seconds after starting the backend
+  - Test: Invoke-WebRequest -Uri http://localhost:8000/health -UseBasicParsing
+
+================================================================================
+PROJECT STRUCTURE
+================================================================================
+
+Backend:
+  D:\Enhancing E-Commerce Website\backend\
+    ├── app/
+    │   ├── main.py          (FastAPI app)
+    │   ├── models/          (Database models)
+    │   ├── schemas/         (Request/response schemas)
+    │   ├── api/             (API routes)
+    │   ├── services/        (Business logic)
+    │   └── core/
+    │       ├── config.py    (Settings)
+    │       └── security.py  (JWT & password hashing)
+    ├── requirements.txt     (Dependencies - Python 3.14)
+    ├── .env                 (Database credentials)
+    └── venv/                (Virtual environment)
+
+Frontend:
+  D:\Enhancing E-Commerce Website\frontend\ecommerce_app\
+    ├── lib/
+    │   ├── main.dart        (App entry point)
+    │   ├── models/          (Data models)
+    │   ├── services/        (API & WebSocket services)
+    │   ├── providers/       (Riverpod state management)
+    │   ├── ui/              (UI layouts - 6 personalized UI styles)
+    │   └── core/
+    │       └── theme/       (App theme & colors)
+    ├── pubspec.yaml         (Dependencies - Flutter 3.41.2)
+    └── web/                 (Web platform files)
+
+================================================================================
