@@ -440,16 +440,20 @@ class _PaymentOption extends StatelessWidget {
       color: selected
           ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
           : null,
-      child: RadioListTile<String>(
-        value: value,
-        groupValue: groupValue,
-        onChanged: onChanged,
+      child: ListTile(
+        leading: Icon(
+          selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+          color: selected
+              ? Theme.of(context).colorScheme.primary
+              : Colors.grey,
+        ),
         title: Row(children: [
           Icon(icon, size: 20),
           const SizedBox(width: 8),
           Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         ]),
         subtitle: Text(subtitle),
+        onTap: () => onChanged(value),
       ),
     );
   }

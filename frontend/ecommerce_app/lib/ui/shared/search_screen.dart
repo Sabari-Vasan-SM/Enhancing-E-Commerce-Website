@@ -432,7 +432,7 @@ class _FilterSheetState extends State<_FilterSheet> {
               style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: _sort,
+            initialValue: _sort,
             decoration: const InputDecoration(
                 border: OutlineInputBorder(), isDense: true),
             items: const [
