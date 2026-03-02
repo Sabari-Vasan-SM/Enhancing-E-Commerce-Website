@@ -12,7 +12,7 @@ from app.models.order import CartItem, WishlistItem, Order, OrderItem, OrderStat
 from app.models.product import Product
 from app.models.behavior import UserBehavior, BehaviorType
 from app.schemas import (
-    CartItemCreate, CartItemUpdate, OrderCreate,
+    CartItemCreate, CartItemUpdate, OrderCreate, OrderFromCartCreate,
     CartItemResponse, OrderResponse, WishlistItemCreate,
 )
 from app.classification import classify_and_update_user
@@ -287,7 +287,9 @@ async def get_user_orders(user_id: int, db: AsyncSession) -> List[Order]:
     """Get all orders for a user."""
     result = await db.execute(
         select(Order)
-        .options(selectinload(Order.items))
+        .options(
+            selectinload(Order.items).selectinload(OrderItem.product)
+        )
         .where(Order.user_id == user_id)
         .order_by(Order.created_at.desc())
     )
@@ -298,10 +300,29 @@ async def get_order_by_id(user_id: int, order_id: int, db: AsyncSession) -> Orde
     """Get a specific order by ID."""
     result = await db.execute(
         select(Order)
-        .options(selectinload(Order.items))
+        .options(
+            selectinload(Order.items).selectinload(OrderItem.product)
+        )
         .where(and_(Order.id == order_id, Order.user_id == user_id))
     )
     order = result.scalar_one_or_none()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     return order
+
+
+async def create_order_from_cart(user_id: int, data: OrderFromCartCreate, db: AsyncSession) -> Order:
+    """Create an order using all items currently in the user's cart."""
+    cart_items = await get_cart(user_id, db)
+    if not cart_items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+
+    from app.schemas import OrderItemCreate, OrderCreate
+    items = [OrderItemCreate(product_id=ci.product_id, quantity=ci.quantity) for ci in cart_items]
+    order_data = OrderCreate(
+        items=items,
+        shipping_address=data.shipping_address,
+        payment_method=data.payment_method,
+        coupon_code=data.coupon_code,
+    )
+    return await create_order(user_id, order_data, db)

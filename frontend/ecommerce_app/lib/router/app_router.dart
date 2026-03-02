@@ -7,6 +7,10 @@ import 'package:ecommerce_app/ui/shared/register_screen.dart';
 import 'package:ecommerce_app/ui/shared/product_detail_screen.dart';
 import 'package:ecommerce_app/ui/shared/cart_screen.dart';
 import 'package:ecommerce_app/ui/shared/profile_screen.dart';
+import 'package:ecommerce_app/ui/shared/checkout_screen.dart';
+import 'package:ecommerce_app/ui/shared/orders_screen.dart';
+import 'package:ecommerce_app/ui/shared/category_products_screen.dart';
+import 'package:ecommerce_app/ui/shared/search_screen.dart';
 import 'package:ecommerce_app/ui/dynamic_ui_loader.dart';
 
 /// App router configuration with GoRouter.
@@ -47,6 +51,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const CartScreen(),
           ),
           GoRoute(
+            path: '/orders',
+            builder: (context, state) => const OrdersScreen(),
+          ),
+          GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfileScreen(),
           ),
@@ -58,6 +66,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
           return ProductDetailScreen(productId: id);
+        },
+      ),
+      // Checkout
+      GoRoute(
+        path: '/checkout',
+        builder: (context, state) => const CheckoutScreen(),
+      ),
+      // Order detail
+      GoRoute(
+        path: '/orders/:id',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return OrderDetailScreen(orderId: id);
+        },
+      ),
+      // Category products
+      GoRoute(
+        path: '/category/:id',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          final name = state.uri.queryParameters['name'] ?? 'Category';
+          return CategoryProductsScreen(categoryId: id, categoryName: name);
+        },
+      ),
+      // Search
+      GoRoute(
+        path: '/search',
+        builder: (context, state) {
+          final query = state.uri.queryParameters['q'];
+          return SearchScreen(initialQuery: query);
         },
       ),
     ],

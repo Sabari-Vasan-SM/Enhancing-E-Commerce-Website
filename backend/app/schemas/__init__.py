@@ -261,6 +261,23 @@ class OrderCreate(BaseModel):
     coupon_code: Optional[str] = None
 
 
+class OrderFromCartCreate(BaseModel):
+    shipping_address: Dict[str, Any] = {}
+    payment_method: Optional[str] = "cod"
+    coupon_code: Optional[str] = None
+
+
+class OrderItemProductInfo(BaseModel):
+    id: int
+    name: str
+    slug: str
+    price: float
+    images: List[str] = []
+    brand_id: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class OrderItemResponse(BaseModel):
     id: int
     product_id: int
@@ -268,6 +285,7 @@ class OrderItemResponse(BaseModel):
     price_at_purchase: float
     discount_at_purchase: float
     total_price: float
+    product: Optional[OrderItemProductInfo] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -283,6 +301,7 @@ class OrderResponse(BaseModel):
     final_amount: float
     payment_method: Optional[str] = None
     payment_status: str
+    shipping_address: Dict[str, Any] = {}
     items: List[OrderItemResponse] = []
     created_at: datetime
     delivered_at: Optional[datetime] = None

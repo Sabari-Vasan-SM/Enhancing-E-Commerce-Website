@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecommerce_app/providers/auth_provider.dart';
+import 'package:ecommerce_app/providers/cart_order_provider.dart';
 import 'package:ecommerce_app/models/product_model.dart';
 import 'package:ecommerce_app/core/theme/app_theme.dart';
 
@@ -107,10 +110,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 height: 300,
                 width: double.infinity,
                 color: isPremium ? AppTheme.premiumBg : Colors.grey[100],
-                child: Image.network(
-                  product.imageUrl,
+                child: CachedNetworkImage(
+                  imageUrl: product.imageUrl,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => Icon(
+                  placeholder: (_, __) => const Center(
+                      child: CircularProgressIndicator()),
+                  errorWidget: (_, __, ___) => Icon(
                     Icons.image_outlined,
                     size: 80,
                     color: Colors.grey[400],
@@ -308,17 +313,27 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     foregroundColor: accentColor,
                   ),
                   onPressed: () async {
-                    final api = ref.read(apiServiceProvider);
-                    await api.addToCart(product.id);
-                    // Track behavior
-                    api.trackBehavior({
-                      'behavior_type': 'add_to_cart',
-                      'product_id': product.id,
-                    });
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Added to cart!')),
-                      );
+                    try {
+                      await ref
+                          .read(cartProvider.notifier)
+                          .addToCart(product.id);
+                      // Track behavior
+                      final api = ref.read(apiServiceProvider);
+                      api.trackBehavior({
+                        'behavior_type': 'add_to_cart',
+                        'product_id': product.id,
+                      });
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Added to cart!')),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: $e')),
+                        );
+                      }
                     }
                   },
                 ),
@@ -333,8 +348,22 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     backgroundColor: accentColor,
                     foregroundColor: Colors.white,
                   ),
-                  onPressed: () {
-                    // Direct purchase flow
+                  onPressed: () async {
+                    // Add to cart then go to checkout
+                    try {
+                      await ref
+                          .read(cartProvider.notifier)
+                          .addToCart(product.id);
+                      if (mounted) {
+                        context.push('/checkout');
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: $e')),
+                        );
+                      }
+                    }
                   },
                 ),
               ),

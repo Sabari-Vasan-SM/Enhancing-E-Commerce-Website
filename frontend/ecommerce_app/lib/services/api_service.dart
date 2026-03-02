@@ -175,12 +175,22 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  Future<void> addToCart(int productId, {int quantity = 1}) async {
-    await http.post(
+  Future<Map<String, dynamic>> addToCart(int productId, {int quantity = 1}) async {
+    final response = await http.post(
       Uri.parse(AppConstants.cartUrl),
       headers: _headers,
       body: jsonEncode({'product_id': productId, 'quantity': quantity}),
     );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> updateCartItem(int itemId, int quantity) async {
+    final response = await http.put(
+      Uri.parse('${AppConstants.cartUrl}/$itemId'),
+      headers: _headers,
+      body: jsonEncode({'quantity': quantity}),
+    );
+    return _handleResponse(response);
   }
 
   Future<void> removeFromCart(int itemId) async {
@@ -226,12 +236,29 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> createOrderFromCart(Map<String, dynamic> data) async {
+    final response = await http.post(
+      Uri.parse('${AppConstants.ordersUrl}/from-cart'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    return _handleResponse(response);
+  }
+
   Future<List<dynamic>> getOrders() async {
     final response = await http.get(
       Uri.parse(AppConstants.ordersUrl),
       headers: _headers,
     );
     return jsonDecode(response.body);
+  }
+
+  Future<Map<String, dynamic>> getOrder(int orderId) async {
+    final response = await http.get(
+      Uri.parse('${AppConstants.ordersUrl}/$orderId'),
+      headers: _headers,
+    );
+    return _handleResponse(response);
   }
 
   // ============ HELPERS ============

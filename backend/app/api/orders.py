@@ -9,13 +9,13 @@ from app.models.user import User
 from app.schemas import (
     CartItemCreate, CartItemUpdate, CartItemResponse,
     WishlistItemCreate, WishlistItemResponse,
-    OrderCreate, OrderResponse,
+    OrderCreate, OrderFromCartCreate, OrderResponse,
     ProductResponse,
 )
 from app.services.order_service import (
     get_cart, add_to_cart, update_cart_item, remove_from_cart,
     get_wishlist, add_to_wishlist, remove_from_wishlist,
-    create_order, get_user_orders, get_order_by_id,
+    create_order, get_user_orders, get_order_by_id, create_order_from_cart,
 )
 
 router = APIRouter(tags=["Orders & Cart"])
@@ -122,6 +122,17 @@ async def place_order(
 ):
     """Place a new order."""
     order = await create_order(current_user.id, data, db)
+    return OrderResponse.model_validate(order)
+
+
+@router.post("/orders/from-cart", response_model=OrderResponse)
+async def place_order_from_cart(
+    data: OrderFromCartCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Place an order using all items in the user's cart."""
+    order = await create_order_from_cart(current_user.id, data, db)
     return OrderResponse.model_validate(order)
 
 
