@@ -10,9 +10,20 @@ from app.core.security import get_password_hash
 
 
 def _img(keyword: str, idx: int = 1, w: int = 640, h: int = 480) -> str:
-    """Generate a product image URL from picsum or via DummyImage."""
-    seed = f"{keyword}-{idx}"
-    return f"https://picsum.photos/seed/{seed}/{w}/{h}"
+    """Generate a product-relevant placeholder image via dummyjson image API.
+    Shows the product keyword on a clean colored background."""
+    text = keyword.replace("-", "+").replace("_", "+")
+    # Category-themed background colors (dark shade for professional look)
+    palettes = [
+        ("2563eb", "ffffff"),  # blue
+        ("7c3aed", "ffffff"),  # purple
+        ("059669", "ffffff"),  # green
+        ("dc2626", "ffffff"),  # red
+        ("d97706", "ffffff"),  # amber
+        ("0891b2", "ffffff"),  # cyan
+    ]
+    bg, fg = palettes[idx % len(palettes)]
+    return f"https://dummyjson.com/image/{w}x{h}/{bg}/{fg}?text={text}&fontSize=16"
 
 
 def _make(name, cat, brand, price, orig=None, disc=0.0, stock=100,
@@ -40,6 +51,15 @@ def _make(name, cat, brand, price, orig=None, disc=0.0, stock=100,
 async def seed():
     await init_db()
     async with AsyncSessionLocal() as db:
+        # ===== CLEAR EXISTING DATA =====
+        from app.models.order import Order, OrderItem, CartItem
+        from app.models.behavior import UserBehavior
+        from sqlalchemy import text
+        # Use TRUNCATE CASCADE to handle all foreign key dependencies
+        await db.execute(text('TRUNCATE TABLE users, products, brands, categories RESTART IDENTITY CASCADE'))
+        await db.commit()
+        print("Cleared existing data.")
+
         # ===== CATEGORIES (8) =====
         cats = [
             Category(name="Electronics", slug="electronics",

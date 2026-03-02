@@ -160,8 +160,7 @@ class _CartItemsList extends ConsumerWidget {
                             onPressed: item.quantity > 1
                                 ? () => ref
                                     .read(cartProvider.notifier)
-                                    .updateQuantity(
-                                        item.id, item.quantity - 1)
+                                    .updateQuantity(item.id, item.quantity - 1)
                                 : null),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -260,8 +259,7 @@ class _OrderSummaryCard extends StatelessWidget {
                 isBold: true, fontSize: 18),
             const SizedBox(height: 16),
             FilledButton(
-              onPressed:
-                  itemCount > 0 ? () => context.push('/checkout') : null,
+              onPressed: itemCount > 0 ? () => context.push('/checkout') : null,
               style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14)),
               child: const Text('Proceed to Checkout',
@@ -278,8 +276,7 @@ class _Row extends StatelessWidget {
   final String label, value;
   final bool isBold;
   final double fontSize;
-  const _Row(this.label, this.value,
-      {this.isBold = false, this.fontSize = 14});
+  const _Row(this.label, this.value, {this.isBold = false, this.fontSize = 14});
 
   @override
   Widget build(BuildContext context) {

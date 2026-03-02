@@ -100,14 +100,17 @@ class ApiService {
       if (isPremium != null) 'is_premium': isPremium.toString(),
     };
 
-    final uri = Uri.parse(AppConstants.productsUrl).replace(queryParameters: params);
+    final uri =
+        Uri.parse(AppConstants.productsUrl).replace(queryParameters: params);
     final response = await http.get(uri, headers: _headers);
     return _handleResponse(response);
   }
 
-  Future<Map<String, dynamic>> getPersonalizedProducts({int page = 1, int pageSize = 20}) async {
+  Future<Map<String, dynamic>> getPersonalizedProducts(
+      {int page = 1, int pageSize = 20}) async {
     final params = {'page': page.toString(), 'page_size': pageSize.toString()};
-    final uri = Uri.parse(AppConstants.personalizedUrl).replace(queryParameters: params);
+    final uri = Uri.parse(AppConstants.personalizedUrl)
+        .replace(queryParameters: params);
     final response = await http.get(uri, headers: _headers);
     return _handleResponse(response);
   }
@@ -175,7 +178,8 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  Future<Map<String, dynamic>> addToCart(int productId, {int quantity = 1}) async {
+  Future<Map<String, dynamic>> addToCart(int productId,
+      {int quantity = 1}) async {
     final response = await http.post(
       Uri.parse(AppConstants.cartUrl),
       headers: _headers,
@@ -236,7 +240,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  Future<Map<String, dynamic>> createOrderFromCart(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> createOrderFromCart(
+      Map<String, dynamic> data) async {
     final response = await http.post(
       Uri.parse('${AppConstants.ordersUrl}/from-cart'),
       headers: _headers,

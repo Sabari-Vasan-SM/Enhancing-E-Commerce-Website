@@ -7,12 +7,6 @@ import 'package:ecommerce_app/core/theme/app_theme.dart';
 import 'package:ecommerce_app/ui/shared/widgets.dart';
 
 /// BRAND UI - For brand-loyal users.
-///
-/// Features:
-/// - Brand slider/carousel at top
-/// - Brand-only homepage layout
-/// - Brand banners
-/// - Products grouped by brand
 class BrandHome extends ConsumerWidget {
   const BrandHome({super.key});
 
@@ -20,6 +14,10 @@ class BrandHome extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final brands = ref.watch(brandsProvider);
     final personalized = ref.watch(personalizedProductsProvider);
+    final w = MediaQuery.of(context).size.width;
+    final isDesktop = w > 1100;
+    final isTablet = w > 700 && w <= 1100;
+    final cols = isDesktop ? 5 : isTablet ? 3 : 2;
 
     return Scaffold(
       appBar: AppBar(
@@ -31,7 +29,10 @@ class BrandHome extends ConsumerWidget {
           ],
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => context.push('/search'),
+          ),
         ],
       ),
       body: RefreshIndicator(
@@ -64,19 +65,11 @@ class BrandHome extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Your Favorite Brands',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          Text('Your Favorite Brands',
+                              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                           SizedBox(height: 4),
-                          Text(
-                            'Products from brands you love',
-                            style: TextStyle(color: Colors.white70),
-                          ),
+                          Text('Products from brands you love',
+                              style: TextStyle(color: Colors.white70)),
                         ],
                       ),
                     ),
@@ -86,15 +79,9 @@ class BrandHome extends ConsumerWidget {
               ),
 
               // Brand Slider
-              const SectionHeader(
-                title: 'Shop by Brand',
-                color: AppTheme.brandColor,
-              ),
+              const SectionHeader(title: 'Shop by Brand', color: AppTheme.brandColor),
               brands.when(
-                loading: () => const SizedBox(
-                  height: 100,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
+                loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
                 error: (_, __) => const SizedBox(),
                 data: (brandList) => SizedBox(
                   height: 100,
@@ -106,12 +93,9 @@ class BrandHome extends ConsumerWidget {
                       final brand = brandList[index];
                       return GestureDetector(
                         onTap: () {
-                          // Track brand view and navigate
                           final api = ref.read(apiServiceProvider);
-                          api.trackBehavior({
-                            'behavior_type': 'brand_view',
-                            'brand_id': brand.id,
-                          });
+                          api.trackBehavior({'behavior_type': 'brand_view', 'brand_id': brand.id});
+                          context.push('/search?q=${Uri.encodeComponent(brand.name)}');
                         },
                         child: Container(
                           width: 90,
@@ -119,48 +103,25 @@ class BrandHome extends ConsumerWidget {
                           child: Column(
                             children: [
                               Container(
-                                width: 60,
-                                height: 60,
+                                width: 60, height: 60,
                                 decoration: BoxDecoration(
                                   color: AppTheme.brandColor.withValues(alpha: 0.1),
                                   shape: BoxShape.circle,
                                   border: brand.isPremium
-                                      ? Border.all(
-                                          color: AppTheme.premiumColor,
-                                          width: 2)
-                                      : null,
+                                      ? Border.all(color: AppTheme.premiumColor, width: 2) : null,
                                 ),
                                 child: Center(
-                                  child: Text(
-                                    brand.name[0],
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.brandColor,
-                                    ),
-                                  ),
+                                  child: Text(brand.name[0],
+                                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.brandColor)),
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              Text(
-                                brand.name,
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              Text(brand.name, textAlign: TextAlign.center, maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
                               if (brand.isPremium)
-                                const Text(
-                                  'Premium',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    color: AppTheme.premiumColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                const Text('Premium',
+                                    style: TextStyle(fontSize: 9, color: AppTheme.premiumColor, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -170,32 +131,27 @@ class BrandHome extends ConsumerWidget {
                 ),
               ),
 
-              // Brand Products
-              const SectionHeader(
+              // Brand Products — responsive grid
+              SectionHeader(
                 title: 'From Your Brands',
                 subtitle: 'Curated picks based on your preferences',
                 color: AppTheme.brandColor,
+                onViewAll: () => context.push('/search?q='),
               ),
               personalized.when(
-                loading: () => const SizedBox(
-                  height: 200,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (_, __) => const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('Unable to load recommendations'),
-                ),
+                loading: () => const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
+                error: (_, __) => const Padding(padding: EdgeInsets.all(16), child: Text('Unable to load recommendations')),
                 data: (rec) => GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.65,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: cols,
+                    childAspectRatio: isDesktop ? 0.72 : 0.65,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                   ),
-                  itemCount: rec.products.length.clamp(0, 10),
+                  itemCount: rec.products.length.clamp(0, 15),
                   itemBuilder: (context, index) {
                     return ProductCard(
                       product: rec.products[index],

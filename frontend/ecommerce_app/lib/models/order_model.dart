@@ -95,8 +95,9 @@ class OrderItemProductInfo {
     );
   }
 
-  String get imageUrl =>
-      images.isNotEmpty ? images.first : 'https://picsum.photos/seed/product/200/200';
+  String get imageUrl => images.isNotEmpty
+      ? images.first
+      : 'https://picsum.photos/seed/product/200/200';
 }
 
 class OrderModel {
@@ -144,13 +145,15 @@ class OrderModel {
       finalAmount: (json['final_amount'] ?? 0).toDouble(),
       paymentMethod: json['payment_method'],
       paymentStatus: json['payment_status'] ?? 'pending',
-      shippingAddress: Map<String, dynamic>.from(json['shipping_address'] ?? {}),
+      shippingAddress:
+          Map<String, dynamic>.from(json['shipping_address'] ?? {}),
       items: (json['items'] as List? ?? [])
           .map((i) => OrderItemModel.fromJson(i))
           .toList(),
       createdAt: DateTime.parse(json['created_at']),
-      deliveredAt:
-          json['delivered_at'] != null ? DateTime.parse(json['delivered_at']) : null,
+      deliveredAt: json['delivered_at'] != null
+          ? DateTime.parse(json['delivered_at'])
+          : null,
     );
   }
 

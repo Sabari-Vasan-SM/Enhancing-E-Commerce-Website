@@ -66,8 +66,7 @@ class OrdersScreen extends ConsumerWidget {
             child: ListView.builder(
               padding: const EdgeInsets.all(12),
               itemCount: orders.length,
-              itemBuilder: (context, index) =>
-                  _OrderCard(order: orders[index]),
+              itemBuilder: (context, index) => _OrderCard(order: orders[index]),
             ),
           );
         },
@@ -143,19 +142,22 @@ class _OrderCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.product?.name ?? 'Product #${item.productId}',
+                                item.product?.name ??
+                                    'Product #${item.productId}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(fontSize: 14),
                               ),
-                              Text('Qty: ${item.quantity} × ${item.formattedPrice}',
+                              Text(
+                                  'Qty: ${item.quantity} × ${item.formattedPrice}',
                                   style: TextStyle(
                                       color: Colors.grey[600], fontSize: 13)),
                             ],
                           ),
                         ),
                         Text(item.formattedTotal,
-                            style: const TextStyle(fontWeight: FontWeight.w600)),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w600)),
                       ],
                     ),
                   )),
@@ -390,8 +392,7 @@ class OrderDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         _DetailRow('Method',
                             (order.paymentMethod ?? 'cod').toUpperCase()),
-                        _DetailRow('Status',
-                            order.paymentStatus.toUpperCase()),
+                        _DetailRow('Status', order.paymentStatus.toUpperCase()),
                       ],
                     ),
                   ),

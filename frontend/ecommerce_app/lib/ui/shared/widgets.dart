@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecommerce_app/models/product_model.dart';
 import 'package:ecommerce_app/core/theme/app_theme.dart';
 
@@ -53,10 +54,15 @@ class ProductCard extends StatelessWidget {
                   ),
                   child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                    child: Image.network(
-                      product.imageUrl,
+                    child: CachedNetworkImage(
+                      imageUrl: product.imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Icon(
+                      placeholder: (_, __) => Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2, color: accentColor,
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) => Icon(
                         Icons.image_outlined,
                         size: 48,
                         color: Colors.grey[400],
@@ -133,15 +139,17 @@ class ProductCard extends StatelessWidget {
               ],
             ),
             // Product info
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      product.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: compactMode ? 12 : 14,
                       fontWeight: FontWeight.w600,
@@ -200,6 +208,7 @@ class ProductCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
             ),
           ],
         ),

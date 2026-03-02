@@ -15,8 +15,7 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
     try {
       final api = ref.read(apiServiceProvider);
       final data = await api.getCart();
-      final items =
-          data.map((item) => CartItemModel.fromJson(item)).toList();
+      final items = data.map((item) => CartItemModel.fromJson(item)).toList();
       state = AsyncValue.data(items);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

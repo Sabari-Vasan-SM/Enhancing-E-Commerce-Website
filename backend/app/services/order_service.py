@@ -280,6 +280,17 @@ async def create_order(user_id: int, data: OrderCreate, db: AsyncSession) -> Ord
     except Exception as e:
         logger.warning(f"Classification after order failed: {e}")
 
+    # Reload order with items + products for proper serialization
+    await db.flush()
+    result = await db.execute(
+        select(Order)
+        .options(
+            selectinload(Order.items).selectinload(OrderItem.product)
+        )
+        .where(Order.id == order.id)
+    )
+    order = result.scalar_one()
+
     return order
 
 
